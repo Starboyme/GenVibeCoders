@@ -5,6 +5,9 @@ import Link from "next/link";
 import Navbar from "@/components/navbar";
 import React, { useState } from "react";
 import { Container } from "@/components/container";
+import { useRouter } from "next/navigation";
+import { signup } from "@auth/signup";
+import { login } from "@auth/login";
 
 const LoginSignup = () => {
   const [tab, setTab] = useState<"login" | "signup">("login");
@@ -19,6 +22,9 @@ const LoginSignup = () => {
   
   // Loading states
   const [isLoading, setIsLoading] = useState(false);
+
+  // Router for navigation
+  const router = useRouter();
 
   const googleLogInOnClick = () => {
     // TODO: Integrate Google OAuth login flow
@@ -35,18 +41,15 @@ const LoginSignup = () => {
     setIsLoading(true);
     
     try {
-      // TODO: Implement actual login logic
-      console.log("Login attempt:", { email: loginEmail, password: loginPassword });
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // TODO: Handle successful login (redirect, store token, etc.)
-      console.log("Login successful!");
-      
+      const user = await login(loginEmail, loginPassword);
+      console.log("Login successful:", user);
+      router.push("/dashboard");  // Redirect after login
     } catch (error) {
-      console.error("Login failed:", error);
-      // TODO: Show error message to user
+      if (error instanceof Error) {
+        console.error("Signup failed:", error.message);
+      } else {
+        console.error("Signup failed:", error);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -57,18 +60,15 @@ const LoginSignup = () => {
     setIsLoading(true);
     
     try {
-      // TODO: Implement actual signup logic
-      console.log("Signup attempt:", { email: signupEmail, password: signupPassword });
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // TODO: Handle successful signup (redirect, store token, etc.)
-      console.log("Signup successful!");
-      
+      const user = await signup(signupEmail, signupPassword);
+      console.log("Signup successful:", user);
+      router.push("/dashboard");  // Redirect after signup
     } catch (error) {
-      console.error("Signup failed:", error);
-      // TODO: Show error message to user
+      if (error instanceof Error) {
+        console.error("Signup failed:", error.message);
+      } else {
+        console.error("Signup failed:", error);
+      }
     } finally {
       setIsLoading(false);
     }
