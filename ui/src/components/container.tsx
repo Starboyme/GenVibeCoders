@@ -1,4 +1,4 @@
-import { cn } from "@/app/lib/utils";
+import { cn } from "@/app/library/utils";
 import React from 'react'
 
 export const Container = ({children,className}: {
