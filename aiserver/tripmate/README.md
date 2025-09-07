@@ -40,17 +40,17 @@ Edit `tripmate/.env` with your Google Cloud project details and region.
 ### 3. Running and Testing Agents
 
 #### Run the Server (CLI)
-
+Ensure that you are in aiserver as pwd
 ```bash
-adk run_server tripmate
+adk run_server
 ```
 
 #### Run the Server (Web Interface)
-
+Ensure that you are in aiserver as pwd
 ```bash
-adk web tripmate
+adk web
 ```
-- Opens a web UI at `http://localhost:8000` for interactive agent testing.
+- Opens a web UI at shown URL for interactive agent testing.
 
 #### Test Individual Agents (CLI)
 

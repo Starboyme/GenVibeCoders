@@ -6,7 +6,7 @@ load_dotenv()
 
 root_agent = Agent(
     model='gemini-2.5-flash',
-    name='root_agent',
+    name='tripmate_agent',
     description='A helpful assistant for user questions.',
     instruction=prompt.ROOT_AGENT_INSTRUCTION,
     before_agent_callback=_load_precreated_itinerary,
