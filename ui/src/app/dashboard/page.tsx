@@ -1,7 +1,7 @@
 "use client";
 
 import ProtectedRoute from "@/components/ProtectedRoute";
-import { logout } from "@auth/logout";
+import { logout } from "@/auth/logout";
 
 export default function Dashboard() {
   return (

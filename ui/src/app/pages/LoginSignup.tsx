@@ -6,8 +6,8 @@ import Navbar from "@/components/navbar";
 import React, { useState } from "react";
 import { Container } from "@/components/container";
 import { useRouter } from "next/navigation";
-import { signup } from "@auth/signup";
-import { login } from "@auth/login";
+import { signup } from "@/auth/signup";
+import { login } from "@/auth/login";
 
 const LoginSignup = () => {
   const [tab, setTab] = useState<"login" | "signup">("login");

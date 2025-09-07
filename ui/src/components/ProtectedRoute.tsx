@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getCurrentUser } from "@auth/trackAuthState";
+import { getCurrentUser } from "@/auth/trackAuthState";
 import { User } from "firebase/auth"; // TS type for user
 
 export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
