@@ -1,0 +1,60 @@
+{
+    "state" : {
+  "user_profile": {
+    "user_id": "",
+    "name": "",
+    "email": "",
+    "preferences": {
+      "budget": {
+        "total": 0,
+        "currency": "USD",
+        "allocations": {
+          "stay": 0,
+          "food": 0,
+          "activities": 0,
+          "transport": 0,
+          "other": 0
+        }
+      },
+      "food": [],
+      "interests": [],
+      "duration_days": 0,
+      "group_size": 0,
+      "special_constraints": []
+    }
+  },
+  "trip_metadata": {
+    "trip_id": "",
+    "trip_name": "",
+    "created_at": "",
+    "last_updated": "",
+    "status": "draft",
+    "phase": "pre_trip",
+    "itinerary_datetime": "", 
+    "itinerary_start_date": "",
+    "itinerary_end_date": ""
+  },
+  "itinerary": {
+    "days": []
+  },
+  "recommendations": {
+    "stays": [],
+    "foods": [],
+    "activities": [],
+    "transport": []
+  },
+  "real_time_adjustments": {
+    "weather": null,
+    "traffic": null,
+    "events": null,
+    "cancellations": null,
+    "alternative_suggestions": []
+  },
+  "post_trip": {
+    "feedback": "",
+    "memories": [],
+    "next_trip_inspiration": []
+  }
+}
+
+}
