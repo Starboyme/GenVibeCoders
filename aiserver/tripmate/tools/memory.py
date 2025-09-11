@@ -46,3 +46,18 @@ def _load_precreated_itinerary(callback_context: CallbackContext):
         print(f"\nLoading Initial State: {data}\n")
 
     _set_initial_states(data["state"], callback_context.state)
+
+def _load_state_from_memory(callback_context: CallbackContext):
+    """
+    Loads the state from memory.
+    Set this as a callback as before_agent_call of the specialized agents.
+    This gets called before the system instruction is contructed.
+
+    Args:
+        callback_context: The callback context.
+    """    
+    memory = callback_context.agent.memory
+    if memory is not None:
+        mem_state = memory.get_state()
+        print(f"\nLoading State from Memory: {mem_state}\n")
+        _set_initial_states(mem_state, callback_context.state)

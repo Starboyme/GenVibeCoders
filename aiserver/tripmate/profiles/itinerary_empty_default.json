@@ -1,60 +1,203 @@
 {
-    "state" : {
-  "user_profile": {
-    "user_id": "",
-    "name": "",
-    "email": "",
-    "preferences": {
-      "budget": {
-        "total": 0,
-        "currency": "USD",
-        "allocations": {
-          "stay": 0,
-          "food": 0,
-          "activities": 0,
-          "transport": 0,
-          "other": 0
+  "state": {
+    "user_profile": {
+      "user_id": "",
+      "name": "",
+      "email": "",
+      "preferences": {
+        "budget": { // refactored to include miscellaneous
+          "total": 0,
+          "currency": "USD",
+          "allocations": {
+            "stay": 0,
+            "food": 0,
+            "activities": 0,
+            "transport": 0,
+            "shopping": 0,
+            "insurance": 0,
+            "miscellaneous": {
+              "predicted": 0,
+              "actual": 0,
+              "auto_categorized": []
+            }
+          }
+        },
+        "language_preference": {
+          "primary": "en",
+          "secondary": ["fr", "es"]
+        },
+        "accommodation_preferences": {
+          "types": [
+            "airbnb",
+            "hotel",
+            "hostel"
+          ], // Preferred stay types
+          "min_rating": 3.5, // Minimum rating filter
+          "amenities": [
+            "wifi",
+            "breakfast",
+            "pool"
+          ], // Required amenities
+          "room_type": "private", // private/shared etc.
+          "proximity_preference": "city_center" // near attractions, airport, city center
+        },
+        "food_preferences": [],
+        "interests": [], // e.g., heritage, adventure, nightlife
+        "duration_days": 0,
+        "group_size": 0,
+        "special_constraints": [] // e.g., wheelchair, vegetarian, kids-friendly
+      }
+    },
+    "trip_metadata": {
+      "trip_id": "",
+      "trip_name": "",
+      "trip_tags": ["#budget", "#adventure", "#family", "#romantic", "#luxury"],
+      "created_at": "",
+      "last_updated": "",
+      "status": "draft", // draft, confirmed, in_progress, completed, cancelled
+      "phase": "planning", // planning, booking, traveling, completed
+      "start_date": "",
+      "end_date": "",
+      "timezone": "Asia/Kolkata",
+      "emergency_contact": {
+        "name": "John Doe",
+        "phone": "+1-234-567-890",
+        "email": "john.doe@example.com",
+        "relationship": "friend"
+      }
+    },
+    "itinerary": {
+      "days": [
+        {
+          "date": "2025-12-01",
+          "stays": [
+            {
+              "name": "Airbnb Cozy Cottage",
+              "location": {
+                "lat": 12.34,
+                "lng": 56.78,
+                "address": "123 Main Street"
+              },
+              "cost": 100,
+              "check_in": "2025-12-01T14:00:00",
+              "check_out": "2025-12-02T11:00:00",
+              "booking_details": {
+                "provider": "Airbnb",
+                "booking_id": "",
+                "status": "pending"
+              }
+            }
+          ],
+          "activities": [
+            {
+              "time": "10:00",
+              "title": "Visit City Museum",
+              "description": "Explore the cultural history",
+              "location": {
+                "lat": 12.34,
+                "lng": 56.78,
+                "address": "Museum Road"
+              },
+              "cost": 20,
+              "booking_details": {
+                "provider": "EMT",
+                "booking_id": "",
+                "status": "pending"
+              },
+              "food_recommendations": {
+                "preference": "near_activity",  // or "explore_city"
+                "options": [
+                  {
+                    "name": "Heritage Cafe",
+                    "distance_km": 0.5,
+                    "rating": 4.3,
+                    "cuisine": "Local",
+                    "cost_estimate": 15,
+                    "address": "Cafe Street"
+                  },
+                  {
+                    "name": "City Bistro",
+                    "distance_km": 1.2,
+                    "rating": 4.7,
+                    "cuisine": "Italian",
+                    "cost_estimate": 25,
+                    "address": "Downtown Road"
+                  },
+                  {
+                    "name": "Veggie Delight",
+                    "distance_km": 2.0,
+                    "rating": 4.5,
+                    "cuisine": "Vegetarian",
+                    "cost_estimate": 12,
+                    "address": "Green Park Lane"
+                  }
+                ]
+              },
+              "transport": {
+                "mode": "cab",
+                "provider": "Uber",
+                "cost": 10,
+                "pickup": "Museum Road",
+                "drop": "Heritage Cafe"
+              }
+            }
+          ],
+          "day_summary": {
+            "total_cost": 145,
+            "total_travel_time": "3h"
+          },
+          "ai_decisions_log": [
+            {
+              "timestamp": "2025-12-01T10:05:00Z",
+              "decision_area": "food_recommendations",
+              "inputs": {
+                "preference": "near_activity",
+                "budget": 20
+              },
+              "choices_considered": [
+                "Heritage Cafe",
+                "City Bistro",
+                "Veggie Delight"
+              ],
+              "final_choice": "City Bistro",
+              "reasoning": "Highest rating within 1km and budget under $20"
+            }
+          ]
         }
+      ],
+      "cost_breakdown": {
+        "stay": 0,
+        "food": 0,
+        "activities": 0,
+        "transport": 0,
+        "total": 0
+      }
+    },
+    "recommendations": {
+      "stays": [],
+      "food_options": [],
+      "activities": [],
+      "transport": []
+    },
+    "real_time_updates": {
+      "weather_alerts": [],
+      "traffic_alerts": [],
+      "event_alerts": [],
+      "cancellations": [],
+      "suggested_alternatives": []
+    },
+    "booking": {
+      "payment_status": "pending", // pending, paid, failed
+      "booking_summary": [], // all confirmed bookings
+      "provider_reference": "" // EMT or other provider reference
+    },
+    "post_trip": {
+      "feedback": {
+        "rating": 0,
+        "comments": ""
       },
-      "food": [],
-      "interests": [],
-      "duration_days": 0,
-      "group_size": 0,
-      "special_constraints": []
+      "memories": [], // photos, notes, locations
+      "next_trip_suggestions": []
     }
-  },
-  "trip_metadata": {
-    "trip_id": "",
-    "trip_name": "",
-    "created_at": "",
-    "last_updated": "",
-    "status": "draft",
-    "phase": "pre_trip",
-    "itinerary_datetime": "", 
-    "itinerary_start_date": "",
-    "itinerary_end_date": ""
-  },
-  "itinerary": {
-    "days": []
-  },
-  "recommendations": {
-    "stays": [],
-    "foods": [],
-    "activities": [],
-    "transport": []
-  },
-  "real_time_adjustments": {
-    "weather": null,
-    "traffic": null,
-    "events": null,
-    "cancellations": null,
-    "alternative_suggestions": []
-  },
-  "post_trip": {
-    "feedback": "",
-    "memories": [],
-    "next_trip_inspiration": []
   }
-}
-
 }

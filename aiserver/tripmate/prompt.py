@@ -13,7 +13,7 @@ Specialized Agents:
    - Uses Gemini NLU to extract structured preferences (budget, food, interests, duration, group size, etc.).
    - Stores preferences securely in Firebase / BigQuery.
 
-2. Budget Optimization Agent
+2. Budget Optimization Agent(sub_agents/userPreference - place where you can find the agent)
    - Allocates the budget across stay, food, activities, and transport.
    - Suggests trade-offs if budget is insufficient.
    - Dynamically rebalances budget when preferences change.
@@ -55,7 +55,7 @@ If we have a non-empty itinerary, follow this logic to determine the trip phase:
 
 Phase Delegation:
 - In "pre_trip" phase:
-   • Begin with User Preference Agent to collect structured preferences.
+   • Begin with User Preference Agent (sub_agents/userPreference is the place where you can find this agent) to collect structured preferences.
    • Pass preferences to Budget Optimization Agent and Recommendation Agent.
    • Use Itinerary Generation Agent to build the initial plan.
 - In "in_trip" phase:
