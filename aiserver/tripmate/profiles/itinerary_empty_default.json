@@ -5,7 +5,7 @@
       "name": "",
       "email": "",
       "preferences": {
-        "budget": { // refactored to include miscellaneous
+        "budget": {
           "total": 0,
           "currency": "USD",
           "allocations": {
@@ -31,21 +31,21 @@
             "airbnb",
             "hotel",
             "hostel"
-          ], // Preferred stay types
-          "min_rating": 3.5, // Minimum rating filter
+          ],
+          "min_rating": 3.5,
           "amenities": [
             "wifi",
             "breakfast",
             "pool"
-          ], // Required amenities
-          "room_type": "private", // private/shared etc.
-          "proximity_preference": "city_center" // near attractions, airport, city center
+          ],
+          "room_type": "private",
+          "proximity_preference": "city_center"
         },
         "food_preferences": [],
-        "interests": [], // e.g., heritage, adventure, nightlife
+        "interests": [],
         "duration_days": 0,
         "group_size": 0,
-        "special_constraints": [] // e.g., wheelchair, vegetarian, kids-friendly
+        "special_constraints": []
       }
     },
     "trip_metadata": {
@@ -54,8 +54,8 @@
       "trip_tags": ["#budget", "#adventure", "#family", "#romantic", "#luxury"],
       "created_at": "",
       "last_updated": "",
-      "status": "draft", // draft, confirmed, in_progress, completed, cancelled
-      "phase": "planning", // planning, booking, traveling, completed
+      "status": "draft",
+      "phase": "planning",
       "start_date": "",
       "end_date": "",
       "timezone": "Asia/Kolkata",
@@ -105,7 +105,7 @@
                 "status": "pending"
               },
               "food_recommendations": {
-                "preference": "near_activity",  // or "explore_city"
+                "preference": "near_activity",
                 "options": [
                   {
                     "name": "Heritage Cafe",
@@ -187,16 +187,16 @@
       "suggested_alternatives": []
     },
     "booking": {
-      "payment_status": "pending", // pending, paid, failed
-      "booking_summary": [], // all confirmed bookings
-      "provider_reference": "" // EMT or other provider reference
+      "payment_status": "pending",
+      "booking_summary": [],
+      "provider_reference": ""
     },
     "post_trip": {
       "feedback": {
         "rating": 0,
         "comments": ""
       },
-      "memories": [], // photos, notes, locations
+      "memories": [],
       "next_trip_suggestions": []
     }
   }
