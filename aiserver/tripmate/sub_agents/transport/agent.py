@@ -8,8 +8,8 @@ from google.adk.agents import Agent
 from google.adk.tools.agent_tool import AgentTool
 
 # Import your tools
-from tripmate.tools.transportTool import flights_search
-from tripmate.tools.airportTool import airport_iata_code_tool
+from tripmate.tools.flightSearchTool import flights_search
+from tripmate.tools.airportIATATool import airport_iata_code_tool
 from tripmate.sub_agents.transport.prompt import TRAVEL_AGENT_PROMPT
 
 
