@@ -7,7 +7,7 @@ from datetime import datetime
 from typing import Dict, Any
 from google.adk.sessions.state import State
 
-SAMPLE_SCENARIO_PATH = os.getenv("TRIPMATE_SCENARIO","tripmate/profiles/itinerary_empty_default.json")
+SAMPLE_SCENARIO_PATH = os.getenv("TRIPMATE_SCENARIO","aiserver/tripmate/profiles/itinerary_empty_default.json")
 
 def _set_initial_states(source: Dict[str, Any], target: State | dict[str, Any]):
     """
