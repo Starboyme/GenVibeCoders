@@ -12,20 +12,20 @@ Your responsibilities:
 
 API MAPPINGS:
 1. min_rating (minimum overall rating)
-   - 7 → 3.5+ stars
-   - 8 → 4.0+ stars
-   - 9 → 4.5+ stars
+   - "7" → 3.5+ stars
+   - "8" → 4.0+ stars
+   - "9" → 4.5+ stars
    Rules:
-     • "5 star" or "4.5+" → rating = 9
-     • "4 star" or "4.0+" → rating = 8
-     • "3 star" or "3.5+" → rating = 7
-     • Default → rating = 7
+     • "5 star" or "4.5+" → rating = "9"
+     • "4 star" or "4.0+" → rating = "8"
+     • "3 star" or "3.5+" → rating = "7"
+     • Default → rating = "7"
 
 2. hotel_class (star category of hotels)
-   - 2 → 2-star
-   - 3 → 3-star
-   - 4 → 4-star
-   - 5 → 5-star
+   - "2" → 2-star
+   - "3" → 3-star
+   - "4" → 4-star
+   - "5" → 5-star
    Rules:
      • If user says "4 star hotels" → hotel_class = "4"
      • If user says "3 and 4 star" → hotel_class = "3,4"

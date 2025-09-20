@@ -1,5 +1,7 @@
 """Tool to search for hotels using SerpApi's Google Hotels API engine."""
+import logging
 import os
+import math
 from typing import Optional, List, Dict, Any, Literal
 from datetime import datetime
 import requests
@@ -13,8 +15,8 @@ class HotelSearchInput(BaseModel):
     check_out_date: str = Field(..., description="The check-out date in the format -> YYYY-MM-DD. e.g. 2025-09-25")
     num_passengers: Optional[int] = Field(default=2, description="Number of guests (adults). Defaults to 2.")
     budget: Optional[float] = Field(default=10000.0, description="The budget or upper bound of price range for the hotel search. Defaults to 10000.0")
-    min_rating: Optional[Literal[7, 8, 9]] = Field(default=7, description="Hotel rating filter: 7 → 3.5+, 8 → 4.0+, 9 → 4.5+. Defaults to 7 (3.5+).")
-    hotel_class: Optional[str] = Field(default="2, 3, 4, 5", description="Comma-separated hotel star ratings: 2=2-star, 3=3-star, 4=4-star, 5=5-star. Example: '3,4,5'")
+    min_rating: Optional[Literal["7", "8", "9"]] = Field(default="7", description="Hotel rating filter: '7' → 3.5+, '8' → 4.0+, '9' → 4.5+. Defaults to '7' (3.5+).")
+    hotel_class: Optional[str] = Field(default="2, 3, 4, 5", description="Comma-separated hotel star ratings: '2'=2-star, '3'=3-star, '4'=4-star, '5'=5-star. Example: '3,4,5'")
     currency: Optional[str] = Field(default="INR", description="The currency for the budget (ISO code, e.g. INR, USD)")
 
 # ---- Date Parsing ----
@@ -74,12 +76,14 @@ def validate_hotel_class(cls, v):
 def validate_min_rating(cls, v):
     """
     Validates minimum rating.
-    - Allowed values: {7, 8, 9}.
-    - Defaults to 7 if user input is invalid.
+    - Allowed values: {'7', '8', '9'} (as strings).
+    - Defaults to '7' if user input is invalid.
+    - Converts to int before use.
     """
-    allowed = {7, 8, 9}
-    default_rating = 7
-    return v if v in allowed else default_rating
+    allowed = {"7", "8", "9"}
+    default_rating = "7"
+    v = v if v in allowed else default_rating
+    return int(v)  # convert to integer so API params use numbers
 
 
 # ---------------- Output Models ----------------
@@ -102,7 +106,7 @@ class HotelSearchResult(BaseModel):
     rate_per_night: Optional[RateInfo]
     total_rate: Optional[RateInfo]
     deal: Optional[str]
-    hotel_class: Optional[str]
+    hotel_class: Optional[int]
     overall_rating: Optional[float]
     reviews: Optional[int]
     location_rating: Optional[float]
@@ -130,7 +134,7 @@ def extract_hotel_data(raw: dict) -> HotelSearchResult:
         rate_per_night=RateInfo(**raw["rate_per_night"]) if "rate_per_night" in raw else None,
         total_rate=RateInfo(**raw["total_rate"]) if "total_rate" in raw else None,
         deal=raw.get("deal"),
-        hotel_class=raw.get("hotel_class"),
+        hotel_class=raw.get("extracted_hotel_class"),
         overall_rating=raw.get("overall_rating"),
         reviews=raw.get("reviews"),
         location_rating=raw.get("location_rating"),
@@ -141,72 +145,178 @@ def extract_hotel_data(raw: dict) -> HotelSearchResult:
     )
 
 
-def hotels_search(hotel_search_input: HotelSearchInput) -> HotelSearchOutput:
+def compute_hotel_score(hotel, min_price, max_price, max_reviews, avg_stars, weights=None) -> float:
     """
-    Search hotels using SerpAPI's Google Hotels API and return structured hotel data (HotelSearchOutput).
-
-    This function:
-      - Builds a query using the input search parameters.
-      - Calls the SerpAPI Google Hotels API to fetch hotel listings.
-      - Extracts and maps the API response into the defined Pydantic models - HotelSearchOutput.
-      - Returns a structured list of hotel search results for further use.
-
-    Args:
-        hotel_search_input (HotelSearchInput):
-            Input parameters for the hotel search, including:
-              - search_query: Destination or hotel search term.
-              - check_in_date / check_out_date: Stay period.
-              - num_passengers: Number of adults.
-              - currency: Currency for pricing.
-              - budget: Maximum price per night (optional).
-              - min_rating: Minimum overall rating filter (optional).
-              - hotel_class: Desired hotel class/star rating (optional).
-
-    Returns:
-        HotelSearchOutput:
-            A structured object containing:
-              - hotels: List of hotels mapped to HotelSearchResult Pydantic models.
-
-    Raises:
-        RuntimeError: If SERPAPI_API_KEY environment variable is missing.
-        requests.HTTPError: If the API request fails with a non-2xx status.
-        ValueError: If response parsing fails unexpectedly.
-
-    Notes:
-        - Uses SerpAPI Google Hotels engine (`engine=google_hotels`).
-        - `rawSearchData` field in output retains raw hotel JSON for debugging or advanced usage.
-        - Can be extended to filter results or sort by ratings/prices as needed.
+    Compute weighted hotel score using:
+    - Price (Non-linear price scaling for rate_per_night.extracted_lowest)
+    - Hotel class (stars / 5)
+    - Rating (rating / 5)
+    - Reviews (log-scaled)
+    - Location (location / 5)
+    - Penalty for low-star hotels
     """
+    if weights is None:
+        weights = {
+            "price": 0.15,
+            "hotel_class": 0.3,
+            "rating": 0.25,
+            "reviews": 0.2,
+            "location": 0.1
+        }
 
-    api_key = os.getenv("SERPAPI_API_KEY")
-    if not api_key:
-        raise RuntimeError("SERPAPI_API_KEY environment variable is required")
-    
-    base_url = "https://serpapi.com/search.json"
-    params = {
-        "engine": "google_hotels",
-        "q": hotel_search_input.search_query,
-        "check_in_date": hotel_search_input.check_in_date,
-        "check_out_date": hotel_search_input.check_out_date,
-        "adults": hotel_search_input.num_passengers,
-        "currency": hotel_search_input.currency,
-        "max_price": int(hotel_search_input.budget),
-        "rating": hotel_search_input.min_rating,
-        "hotel_class": hotel_search_input.hotel_class,
-        "api_key": api_key
-    }
+    price = hotel.get('rate_per_night', {}).get('extracted_lowest', max_price)
+    stars = hotel.get('hotel_class', avg_stars) or avg_stars
+    rating = hotel.get('overall_rating', 0)
+    reviews = hotel.get('reviews', 0)
+    location = hotel.get('location_rating', 5)
 
-    response = requests.get(base_url, params=params)
-    response.raise_for_status()
-    data = response.json()
+    # --- Non-linear Price Scaling ---
+    if max_price > min_price:
+        price_norm = (price - min_price) / (max_price - min_price)
+        price_score = 1 - math.sqrt(price_norm)  # smooth scaling: cheap != huge advantage
+    else:
+        price_score = 1
 
-    hotels_raw = data.get("properties", [])
-    hotels = [extract_hotel_data(h) for h in hotels_raw]
+    # Penalize very low-star hotels so cheap 2-star doesn't dominate
+    if stars < 3:
+        price_score *= 0.7
 
-    # Optional: filter by min_rating
-    # hotels = [h for h in hotels if (h.overall_rating or 0) >= hotel_search_input.min_rating]
+    # --- Normalization for other features ---
+    hotel_class_score = stars / 5
+    rating_score = rating / 5
+    reviews_score = math.log(1 + reviews) / math.log(1 + max_reviews) if max_reviews > 0 else 0
+    location_score = location / 5  # because location rating is out of 5
 
-    # Sort by rating descending
-    # hotels.sort(key=lambda x: x.overall_rating or 0, reverse=True)
-    return HotelSearchOutput(hotels=hotels)
+    final_score = (
+        weights['price'] * price_score +
+        weights['hotel_class'] * hotel_class_score +
+        weights['rating'] * rating_score +
+        weights['reviews'] * reviews_score +
+        weights['location'] * location_score
+    )
+
+    return final_score
+
+
+def hotels_search(
+        search_query: str,
+        check_in_date: str,
+        check_out_date: str,
+        num_passengers: Optional[int] = 2,
+        budget: Optional[float] = 10000.0,
+        min_rating: Optional[Literal["7", "8", "9"]] = "7",
+        hotel_class: Optional[str] = "2, 3, 4, 5",
+        currency: Optional[str] = "INR"
+    ) -> HotelSearchOutput:
+        """
+        Search hotels using SerpAPI's Google Hotels API and return structured hotel data (HotelSearchOutput).
+
+        This function:
+        - Builds a query using the input search parameters.
+        - Calls the SerpAPI Google Hotels API to fetch hotel listings.
+        - Extracts and maps the API response into the defined Pydantic models - HotelSearchOutput.
+        - Uses multi-criteria sorting to rank hotels.
+        - Returns a structured list of hotel search results for further use.
+
+        Args:
+            hotel_search_input (HotelSearchInput):
+                Input parameters for the hotel search, including:
+                - search_query: Destination or hotel search term.
+                - check_in_date / check_out_date: Stay period.
+                - num_passengers: Number of adults (optional).
+                - currency: Currency for pricing (optional).
+                - budget: Maximum price per night (optional).
+                - min_rating: Minimum overall rating filter (optional).
+                - hotel_class: Desired hotel class/star rating (optional).
+
+        Returns:
+            HotelSearchOutput:
+                A structured object containing:
+                - hotels: List of hotels mapped to HotelSearchResult Pydantic models.
+
+        Raises:
+            RuntimeError: If SERPAPI_API_KEY environment variable is missing.
+            requests.HTTPError: If the API request fails with a non-2xx status.
+            ValueError: If response parsing fails unexpectedly.
+
+        Notes:
+            - Uses SerpAPI Google Hotels engine (`engine=google_hotels`).
+            - `rawSearchData` field in output retains raw hotel JSON for debugging or advanced usage.
+            - Filter results or sort by ratings/prices as needed.
+        """
+
+        # --- Ensure API key is set ---
+        api_key = os.getenv("SERPAPI_API_KEY")
+        if not api_key:
+            raise RuntimeError("SERPAPI_API_KEY environment variable is required")
+        
+        # --- Convert dict input to Pydantic model safely ---
+        try:
+            hotel_search_input = HotelSearchInput(
+                search_query=search_query,
+                check_in_date=check_in_date,
+                check_out_date=check_out_date,
+                num_passengers=num_passengers,
+                budget=budget,
+                min_rating=min_rating,
+                hotel_class=hotel_class,
+                currency=currency
+            )
+        except Exception as e:
+            logging.error(f"Input validation failed: {e}")
+            return HotelSearchOutput(hotels=[])
+
+        base_url = "https://serpapi.com/search.json"
+        params = {
+            "engine": "google_hotels",
+            "q": hotel_search_input.search_query,
+            "check_in_date": hotel_search_input.check_in_date,
+            "check_out_date": hotel_search_input.check_out_date,
+            "adults": hotel_search_input.num_passengers,
+            "currency": hotel_search_input.currency,
+            "max_price": int(hotel_search_input.budget),
+            "rating": int(hotel_search_input.min_rating),
+            "hotel_class": hotel_search_input.hotel_class,
+            "api_key": api_key
+        }
+
+        try:
+            # --- Call API ---
+            response = requests.get(base_url, params=params, timeout=10)
+            response.raise_for_status()
+            data = response.json()
+
+            # --- Extract hotel data safely ---
+            hotels_raw = data.get("properties", [])
+            if not hotels_raw:
+                logging.warning("No hotels found in API response")
+                return HotelSearchOutput(hotels=[])
+            
+            hotels = [extract_hotel_data(h).model_dump() for h in hotels_raw]
+
+            # --- Compute min/max prices and max reviews for normalization ---
+            prices = [h.get('rate_per_night', {}).get('extracted_lowest', 0) for h in hotels]
+            min_price = min(prices) if prices else 0
+            max_price = max(prices) if prices else 1
+            max_reviews = max(h.get('reviews', 0) for h in hotels) if hotels else 1
+            avg_stars = sum(h.get('hotel_class', 0) for h in hotels) / len(hotels) if hotels else 3
+            
+            logging.info(f"Price range: {min_price} - {max_price}, Max reviews: {max_reviews}, Avg stars: {avg_stars}")
+
+            # --- Apply weighted scoring ---
+            for h in hotels:
+                h['final_score'] = compute_hotel_score(h, min_price, max_price, max_reviews, avg_stars)
+
+            # Sort hotels by final_score descending
+            hotels_sorted = sorted(hotels, key=lambda x: x['final_score'], reverse=True)
+
+            return HotelSearchOutput(hotels=hotels_sorted)
+        
+        except requests.RequestException as e:
+            logging.error(f"API request failed: {e}")
+            return HotelSearchOutput(hotels=[])
+
+        except Exception as e:
+            logging.error(f"Unexpected error: {e}")
+            return HotelSearchOutput(hotels=[])
 
