@@ -92,7 +92,6 @@ def build_distance_matrix(places: list, api_key: str = API_KEY, travel_mode: str
     resp.raise_for_status()
     
     data = resp.json()
-    print(data)
     
     # Initialize matrix
     n = len(places)

@@ -10,7 +10,7 @@ from vertexai.agent_engines import AdkApp
 # Import your tools
 from tools.flightSearchTool import flights_search
 from tools.airportIATATool import airport_iata_code_tool
-from nodes.transport.prompt import TRAVEL_AGENT_PROMPT
+from nodes.transport_agent.prompt import TRAVEL_AGENT_PROMPT
 from tools.stationCodeTool import railway_station_code_tool
 from tools.trainSearchTool import train_search
 

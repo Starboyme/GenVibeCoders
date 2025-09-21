@@ -5,6 +5,8 @@ import requests
 from typing import Optional, List
 from pydantic import BaseModel, Field
 from datetime import datetime, timedelta
+from dotenv import load_dotenv
+load_dotenv()
 
 # --------------------------
 # Pydantic Models

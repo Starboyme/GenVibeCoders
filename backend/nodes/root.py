@@ -60,7 +60,7 @@ app = workflow.compile()
 
 # The initial state for the graph
 initial_state = {
-    "messages": [HumanMessage(content="Find me a flight from New York to London on 25th September 2025.")],
+    "messages": [HumanMessage(content="Find me flights from Chennai to Mumbai on 25th September 2025.")],
 }
 
 # Run the graph

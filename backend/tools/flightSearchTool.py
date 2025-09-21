@@ -4,6 +4,8 @@ import os
 from typing import Optional, List, Dict, Any
 import requests
 from pydantic import BaseModel, Field
+from dotenv import load_dotenv
+load_dotenv()
 
 
 class FlightsSearchInput(BaseModel):

@@ -1,3 +1,5 @@
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+
 PROMPT = "You are a helpful assistant that helps people find airports in the given list of cities. \
   You have access to get_airports tool to get information about airports. \
   Determine whether the airport is domestic/international using the 'type' field from API response \
@@ -18,10 +20,19 @@ from tools.airports_tool import get_airports
 load_dotenv()
 
 from langchain_google_vertexai import ChatVertexAI
+from langchain.agents import create_tool_calling_agent, AgentExecutor
 
 llm = ChatVertexAI(model_name="gemini-2.5-flash")
-
-llm_with_tools = llm.bind_tools([get_airports])
+agent = create_tool_calling_agent(
+  llm, 
+  [get_airports], 
+  ChatPromptTemplate.from_messages([
+    ("system", PROMPT),
+    MessagesPlaceholder(variable_name="messages"),
+    MessagesPlaceholder(variable_name="agent_scratchpad")
+  ])
+)
+llm_with_tools = AgentExecutor(agent=agent, tools=[get_airports], verbose=True)
 
 from typing_extensions import Annotated, TypedDict
 from langchain_core.messages import AnyMessage, HumanMessage, SystemMessage, AIMessage
@@ -49,12 +60,10 @@ graph = workflow.compile()
 
 
 async def run():
-  initial_state: State = {
-    "messages": [SystemMessage(content=PROMPT)]
-  }
   query = "airports in bangalore"
-  state = initial_state.copy()
-  state["messages"].append(HumanMessage(content=query))
+  state: State = {
+    "messages": [HumanMessage(content=query)]
+  }
   events = set()
   async for event in graph.astream_events(state, version="v1"):
         kind = event["event"]
