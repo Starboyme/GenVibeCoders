@@ -106,7 +106,7 @@ async def synthesizer_agent(state: TravelState):
     accommodations = state.get("accommodations", []) or []
     effective_days = state.get("effective_days", state["days"])
     
-    print(f"📊 Processing data - Places: {len(places)}, Route: {len(optimal_route)}, Schedule: {bool(daily_schedule)}, Travel: {bool(travel_info)}, Accommodations: {len(accommodations)}")
+    # print(f"📊 Processing data - Places: {len(places)}, Route: {len(optimal_route)}, Schedule: {bool(daily_schedule)}, Travel: {bool(travel_info)}, Accommodations: {len(accommodations)}")
     
     # Create structured data for the LLM
     structured_data = build_structured_data(state, places, optimal_route, daily_schedule, travel_info, accommodations, effective_days)
